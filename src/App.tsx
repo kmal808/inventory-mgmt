@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Download, FileText, Save, Plus, Loader2 } from 'lucide-react';
-import { Toaster, toast } from 'react-hot-toast';
+import { Download, FileText, Plus, Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import Sidebar from './components/Sidebar';
 import InventoryForm from './components/InventoryForm';
 import InventoryTable from './components/InventoryTable';
 import Auth from './components/Auth';
-import { useSupabase } from './context/SupabaseProvider';
+import { useSupabase } from './context';
 import { useContainerLists } from './hooks/useContainerLists';
 import { useContainerList } from './hooks/useContainerList';
 import { useInventoryItems } from './hooks/useInventoryItems';
@@ -120,7 +120,6 @@ export default function App() {
           )}
         </div>
       </div>
-      <Toaster position="top-right" />
     </div>
   );
 }
