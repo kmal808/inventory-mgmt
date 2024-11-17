@@ -9,30 +9,36 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const initializeAuth = async () => {
+    // Check for existing session
+    const initSession = async () => {
       try {
         const {
           data: { session },
+          error,
         } = await supabase.auth.getSession()
+        if (error) throw error
         setSession(session)
-        setLoading(false)
-
-        const {
-          data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-          setSession(session)
-          setLoading(false)
-        })
-
-        return () => subscription.unsubscribe()
       } catch (error) {
-        console.error('Supabase initialization error:', error)
-        toast.error('Failed to initialize authentication')
+        console.error('Session initialization error:', error)
+        toast.error('Failed to restore session')
+      } finally {
         setLoading(false)
       }
     }
 
-    initializeAuth()
+    initSession()
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session)
+      setLoading(false)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   return (

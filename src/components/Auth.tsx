@@ -1,10 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { Package } from 'lucide-react'
+import { toast } from 'react-hot-toast'
 
 export default function Auth() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
+
+  useEffect(() => {
+    // Handle the OAuth callback
+    const handleAuthCallback = async () => {
+      const { error } = await supabase.auth.getSession()
+      if (error) {
+        console.error('Error during auth callback:', error.message)
+        toast.error('Authentication failed. Please try again.')
+      }
+    }
+
+    if (window.location.hash || window.location.search) {
+      handleAuthCallback()
+    }
+  }, [])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,9 +36,12 @@ export default function Auth() {
       })
 
       if (error) throw error
-      alert('Check your email for the login link!')
+      toast.success('Check your email for the login link!')
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'An error occurred')
+      console.error('Login error:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to send login link'
+      )
     } finally {
       setLoading(false)
     }
