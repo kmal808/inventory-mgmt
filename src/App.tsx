@@ -19,6 +19,7 @@ export default function App() {
     error: listsError,
     createList,
     deleteList,
+    refetch: refetchLists,
   } = useContainerLists()
   const [selectedListId, setSelectedListId] = useState<string | null>(null)
 
@@ -73,6 +74,7 @@ export default function App() {
       return
     }
     await addItem(item)
+    refetchLists() // Refresh the lists to update the counter
   }
 
   return (
@@ -91,48 +93,72 @@ export default function App() {
             <h1 className='text-3xl font-bold text-gray-900'>
               Warehouse Inventory Management
             </h1>
-            {selectedList && (
-              <div className='flex gap-4'>
+            <div className='flex gap-4'>
+              {!selectedListId && (
                 <button
-                  onClick={() => exportToPDF(selectedList)}
-                  className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'>
-                  <FileText className='w-4 h-4' />
-                  Export PDF
+                  onClick={() => setSelectedListId(null)}
+                  className='flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700'>
+                  <Plus className='w-4 h-4' />
+                  New Container List
                 </button>
-                <button
-                  onClick={() => exportToCSV(selectedList)}
-                  className='flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700'>
-                  <Download className='w-4 h-4' />
-                  Export CSV
-                </button>
-              </div>
-            )}
+              )}
+              {selectedList && (
+                <>
+                  <button
+                    onClick={() => exportToPDF(selectedList)}
+                    className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'>
+                    <FileText className='w-4 h-4' />
+                    Export PDF
+                  </button>
+                  <button
+                    onClick={() => exportToCSV(selectedList)}
+                    className='flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700'>
+                    <Download className='w-4 h-4' />
+                    Export CSV
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
           {selectedListId ? (
             <div className='space-y-8'>
               <div className='bg-white p-6 rounded-lg shadow-md mb-8'>
-                <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-                  {selectedList?.name}
-                </h2>
-                <p className='text-sm text-gray-500'>
-                  Created on{' '}
-                  {new Date(
-                    selectedList?.created_at || ''
-                  ).toLocaleDateString()}
-                </p>
+                <div className='flex justify-between items-center'>
+                  <div>
+                    <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+                      {selectedList?.name}
+                    </h2>
+                    <p className='text-sm text-gray-500'>
+                      Created on{' '}
+                      {new Date(
+                        selectedList?.created_at || ''
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setSelectedListId(null)}
+                    className='text-purple-600 hover:text-purple-800 font-medium'>
+                    Create New List
+                  </button>
+                </div>
               </div>
 
               <InventoryForm onAddItem={handleAddItem} />
 
-              {selectedList && (
-                <InventoryTable
-                  items={selectedList.items}
-                  onDeleteItem={deleteItem}
-                  onEditItem={() =>
-                    toast.error('Edit functionality coming soon')
-                  }
-                />
+              {selectedList && selectedList.items.length > 0 && (
+                <div className='mt-8'>
+                  <h3 className='text-lg font-semibold text-gray-900 mb-4'>
+                    Inventory Items
+                  </h3>
+                  <InventoryTable
+                    items={selectedList.items}
+                    onDeleteItem={deleteItem}
+                    onEditItem={() =>
+                      toast.error('Edit functionality coming soon')
+                    }
+                  />
+                </div>
               )}
             </div>
           ) : (
