@@ -1,12 +1,7 @@
-import { createContext } from 'react';
-import type { Session } from '@supabase/supabase-js';
-
-interface SupabaseContextType {
-  session: Session | null;
-  loading: boolean;
-}
+import { createContext } from 'react'
+import type { SupabaseContextType } from './types'
 
 export const SupabaseContext = createContext<SupabaseContextType>({
   session: null,
   loading: true,
-});
+})

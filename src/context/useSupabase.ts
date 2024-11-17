@@ -1,10 +1,11 @@
-import { useContext } from 'react';
-import { SupabaseContext } from './SupabaseProvider';
+import { useContext } from 'react'
+import { SupabaseContext } from './supabaseContext'
+import type { SupabaseContextType } from './types'
 
-export function useSupabase() {
-  const context = useContext(SupabaseContext);
+export function useSupabase(): SupabaseContextType {
+  const context = useContext(SupabaseContext)
   if (!context) {
-    throw new Error('useSupabase must be used within a SupabaseProvider');
+    throw new Error('useSupabase must be used within a SupabaseProvider')
   }
-  return context;
+  return context
 }
