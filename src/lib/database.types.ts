@@ -14,16 +14,20 @@ export interface Database {
           id: string
           created_at: string
           user_id: string | null
+          container_number: string
+          name: string
         }
         Insert: {
           id?: string
           created_at?: string
           user_id?: string | null
+          container_number: string
         }
         Update: {
           id?: string
           created_at?: string
           user_id?: string | null
+          container_number?: string
         }
       }
       inventory_items: {

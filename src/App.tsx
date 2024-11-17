@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast'
 import Sidebar from './components/Sidebar'
 import InventoryForm from './components/InventoryForm'
 import InventoryTable from './components/InventoryTable'
+import CreateContainerForm from './components/CreateContainerForm'
 import Auth from './components/Auth'
 import { useSupabase } from './context'
 import { useContainerLists } from './hooks/useContainerLists'
@@ -17,6 +18,7 @@ export default function App() {
     loading: listsLoading,
     error: listsError,
     createList,
+    deleteList,
   } = useContainerLists()
   const [selectedListId, setSelectedListId] = useState<string | null>(null)
 
@@ -39,14 +41,29 @@ export default function App() {
     toast.error(listsError)
   }
 
-  const handleCreateList = async () => {
+  const handleCreateList = async (containerNumber: string) => {
     try {
-      const newList = await createList()
+      const newList = await createList(containerNumber)
       if (newList) {
         setSelectedListId(newList.id)
       }
     } catch (error) {
       // Error is handled by the hook
+    }
+  }
+
+  const handleDeleteList = async (id: string) => {
+    if (
+      window.confirm('Are you sure you want to delete this container list?')
+    ) {
+      try {
+        await deleteList(id)
+        if (selectedListId === id) {
+          setSelectedListId(null)
+        }
+      } catch (error) {
+        // Error is handled by the hook
+      }
     }
   }
 
@@ -64,7 +81,7 @@ export default function App() {
         containerLists={lists}
         selectedListId={selectedListId}
         onSelectList={setSelectedListId}
-        onCreateList={handleCreateList}
+        onDeleteList={handleDeleteList}
         loading={listsLoading}
       />
 
@@ -74,36 +91,41 @@ export default function App() {
             <h1 className='text-3xl font-bold text-gray-900'>
               Warehouse Inventory Management
             </h1>
-            <div className='flex gap-4'>
-              {selectedList && (
-                <>
-                  <button
-                    onClick={() => exportToPDF(selectedList)}
-                    className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'>
-                    <FileText className='w-4 h-4' />
-                    Export PDF
-                  </button>
-                  <button
-                    onClick={() => exportToCSV(selectedList)}
-                    className='flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700'>
-                    <Download className='w-4 h-4' />
-                    Export CSV
-                  </button>
-                </>
-              )}
-              <button
-                onClick={handleCreateList}
-                className='flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700'>
-                <Plus className='w-4 h-4' />
-                New List
-              </button>
-            </div>
+            {selectedList && (
+              <div className='flex gap-4'>
+                <button
+                  onClick={() => exportToPDF(selectedList)}
+                  className='flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'>
+                  <FileText className='w-4 h-4' />
+                  Export PDF
+                </button>
+                <button
+                  onClick={() => exportToCSV(selectedList)}
+                  className='flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700'>
+                  <Download className='w-4 h-4' />
+                  Export CSV
+                </button>
+              </div>
+            )}
           </div>
 
           {selectedListId ? (
             <div className='space-y-8'>
+              <div className='bg-white p-6 rounded-lg shadow-md mb-8'>
+                <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+                  {selectedList?.name}
+                </h2>
+                <p className='text-sm text-gray-500'>
+                  Created on{' '}
+                  {new Date(
+                    selectedList?.created_at || ''
+                  ).toLocaleDateString()}
+                </p>
+              </div>
+
               <InventoryForm onAddItem={handleAddItem} />
-              {selectedList && selectedList.items.length > 0 && (
+
+              {selectedList && (
                 <InventoryTable
                   items={selectedList.items}
                   onDeleteItem={deleteItem}
@@ -114,12 +136,7 @@ export default function App() {
               )}
             </div>
           ) : (
-            <div className='text-center py-12'>
-              <h2 className='text-xl text-gray-600'>
-                Select a container list from the sidebar or create a new one to
-                get started
-              </h2>
-            </div>
+            <CreateContainerForm onCreateList={handleCreateList} />
           )}
         </div>
       </div>

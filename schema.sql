@@ -10,7 +10,11 @@ DROP TABLE IF EXISTS container_lists;
 CREATE TABLE container_lists (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    user_id UUID REFERENCES auth.users(id) NOT NULL
+    user_id UUID REFERENCES auth.users(id) NOT NULL,
+    container_number TEXT NOT NULL CHECK (container_number ~ '^[A-Z]{4}-[0-9]{5}$'),
+    name TEXT GENERATED ALWAYS AS (
+        'Container ' || container_number
+    ) STORED
 );
 
 CREATE TABLE inventory_items (

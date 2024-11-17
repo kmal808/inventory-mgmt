@@ -1,66 +1,69 @@
-import React from 'react';
-import { FileText, Package, Plus, Loader2 } from 'lucide-react';
-import { ContainerListWithItems } from '../hooks/useContainerLists';
+import React from 'react'
+import { FileText, Package, Trash2, Loader2 } from 'lucide-react'
+import { ContainerListWithItems } from '../hooks/useContainerLists'
 
 interface SidebarProps {
-  containerLists: ContainerListWithItems[];
-  selectedListId: string | null;
-  onSelectList: (id: string) => void;
-  onCreateList: () => void;
-  loading: boolean;
+  containerLists: ContainerListWithItems[]
+  selectedListId: string | null
+  onSelectList: (id: string) => void
+  onDeleteList: (id: string) => void
+  loading: boolean
 }
 
 export default function Sidebar({
   containerLists,
   selectedListId,
   onSelectList,
-  onCreateList,
-  loading
+  onDeleteList,
+  loading,
 }: SidebarProps) {
   return (
-    <div className="w-64 bg-gray-800 text-white h-screen overflow-hidden flex flex-col">
-      <div className="p-4 flex items-center gap-2 border-b border-gray-700">
-        <Package className="w-6 h-6" />
-        <h2 className="text-xl font-semibold">Container Lists</h2>
+    <div className='w-80 bg-gray-800 text-white h-screen overflow-hidden flex flex-col'>
+      <div className='p-4 flex items-center gap-2 border-b border-gray-700'>
+        <Package className='w-6 h-6' />
+        <h2 className='text-xl font-semibold'>Container Lists</h2>
       </div>
-      
-      <button
-        onClick={onCreateList}
-        className="mx-2 mt-2 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-      >
-        <Plus className="w-4 h-4" />
-        New List
-      </button>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className='flex-1 overflow-y-auto p-2'>
         {loading ? (
-          <div className="flex justify-center py-4">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          <div className='flex justify-center py-4'>
+            <Loader2 className='w-6 h-6 animate-spin text-gray-400' />
           </div>
         ) : containerLists.length === 0 ? (
-          <p className="text-center py-4 text-gray-400">No lists yet</p>
+          <p className='text-center py-4 text-gray-400'>No lists yet</p>
         ) : (
           containerLists.map((list) => (
-            <button
+            <div
               key={list.id}
-              onClick={() => onSelectList(list.id)}
-              className={`w-full text-left p-3 rounded-lg mb-1 flex items-center gap-2 hover:bg-gray-700 transition-colors ${
-                selectedListId === list.id ? 'bg-gray-700' : ''
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <div>
-                <div className="font-medium">
-                  {new Date(list.created_at).toLocaleDateString()}
+              className={`group relative mb-1 rounded-lg transition-colors ${
+                selectedListId === list.id ? 'bg-gray-700' : 'hover:bg-gray-700'
+              }`}>
+              <button
+                onClick={() => onSelectList(list.id)}
+                className='w-full text-left p-3 pr-12'>
+                <div className='font-medium'>{list.name}</div>
+                <div className='text-sm text-gray-400 mt-1'>
+                  Created: {new Date(list.created_at).toLocaleDateString()}
                 </div>
-                <div className="text-sm text-gray-400">
-                  {list.items.length} items
+                <div className='text-sm text-gray-400'>
+                  {list.items.length}{' '}
+                  {list.items.length === 1 ? 'item' : 'items'}
                 </div>
-              </div>
-            </button>
+              </button>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDeleteList(list.id)
+                }}
+                className='absolute right-2 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity'
+                title='Delete list'>
+                <Trash2 className='w-4 h-4' />
+              </button>
+            </div>
           ))
         )}
       </div>
     </div>
-  );
+  )
 }

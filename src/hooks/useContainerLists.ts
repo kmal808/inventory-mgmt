@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { toast } from 'react-hot-toast'
 import type { Database } from '../lib/database.types'
@@ -57,14 +57,19 @@ export function useContainerLists() {
     }
   }
 
-  const createList = async () => {
+  const createList = async (containerNumber: string) => {
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser()
       if (userError) throw userError
 
       const { data, error } = await supabase
         .from('container_lists')
-        .insert([{ user_id: userData.user.id }])
+        .insert([
+          {
+            user_id: userData.user.id,
+            container_number: containerNumber,
+          },
+        ])
         .select()
         .single()
 
